@@ -13,10 +13,11 @@ function getFetch(){
       const potentialPet = new PokeInfo(data.name, data.height, data.weight, data.types, data.sprites.other['official-artwork'].front_default, data.location_area_encounters)
       potentialPet.getTypes()
       potentialPet.isItHousePet()
-      potentialPet.encounterInfo()
       let decision = '';
       if(potentialPet.housePet){
-        decision = 'This Pokemon is small enough, light enough, and safe enough to be a good pet!'
+        decision = `This Pokemon is small enough, light enough, and safe enough to be a good pet! You can find the ${potentialPet.name} in the following location(s):`
+        potentialPet.encounterInfo()
+        document.getElementById('locations').innerText = ''
       } else{
         decision = `This Pokemon wouldn't be a good pet because ${potentialPet.reason.join(' and ')}.`
       }
@@ -85,10 +86,23 @@ class PokeInfo extends Poke {
         .then(res => res.json())
         .then(data => {
           console.log(data)
+          for (const item of data){
+            this.locationList.push(item.location_area.name)
+          }
+          console.log(this.locationList)
+          let target = document.getElementById('locations')
+          target.innerText = this.locationCleanup()
+          console.log(this.locationCleanup())
         })
         .catch(err => {
           console.log(`error ${err}`)
         });
     }
-  
+  locationCleanup(){
+    const words = this.locationList.slice(0,5).join(', ').replaceAll('-',' ').split(' ');
+    for (let i = 0; i < words.length; i++){
+      words[i] = words[i][0].toUpperCase() + words[i].slice(1)
+    }
+    return words.join(' ')
+  }
 }
